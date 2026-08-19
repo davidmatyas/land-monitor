@@ -1,0 +1,28 @@
+search:
+  regions:
+    - Liberecky kraj
+    - Stredocesky kraj
+    - Plzensky kraj
+    - Ustecky kraj
+  min_area_m2: 1000
+  max_price_czk: 1000000
+  max_price_per_m2_czk: 1000
+  max_train_distance_km: 3
+
+excluded_land_types:
+  - orna puda
+  - les
+  - lesni pozemek
+  - vinice
+  - ovocny sad
+
+scoring:
+  category_a_min: 75
+  category_b_min: 55
+
+notifications:
+  send_category_a_immediately: true
+  send_category_b_in_digest: true
+
+scheduler:
+  interval_hours: 6
