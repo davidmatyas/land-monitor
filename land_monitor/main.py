@@ -1,9 +1,15 @@
-"""CLI entry point for the Land Monitor smoke test."""
+"""CLI entry point for the first live Sreality collector."""
+
+from .report import write_json
+from .sreality import fetch_estates
 
 
 def main() -> None:
-    print("Land Monitor smoke test: OK")
-    print("Configuration and collector stages will be enabled in subsequent steps.")
+    print("Land Monitor: fetching first Sreality page...")
+    listings = fetch_estates()
+    path = write_json(listings)
+    print(f"Fetched {len(listings)} listings")
+    print(f"Report: {path}")
 
 
 if __name__ == "__main__":
