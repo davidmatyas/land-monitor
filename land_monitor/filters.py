@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from .models import Listing
 
 TARGET_REGIONS = {"Liberecký kraj", "Středočeský kraj", "Plzeňský kraj", "Ústecký kraj"}
-# Explicit phrases/types that are outside the intended search.
 EXCLUDED_PATTERNS = (
     re.compile(r"\borná\s+půda\b", re.IGNORECASE),
     re.compile(r"\blesní\s+(?:pozemek|půda)\b", re.IGNORECASE),
