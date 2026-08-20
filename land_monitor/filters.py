@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from .models import Listing
 
 TARGET_REGIONS = {"Liberecký kraj", "Středočeský kraj", "Plzeňský kraj", "Ústecký kraj"}
-# Use phrases rather than the bare word "les", which would also match
-# unrelated Czech words containing that character sequence.
-EXCLUDED_PHRASES = ("orná půda", "lesní pozemek", "lesní půda", "les")
+# Explicit phrases/types that are outside the intended search.
+EXCLUDED_PATTERNS = (
+    re.compile(r"\borná\s+půda\b", re.IGNORECASE),
+    re.compile(r"\blesní\s+(?:pozemek|půda)\b", re.IGNORECASE),
+    re.compile(r"\bles\b", re.IGNORECASE),
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,8 +22,6 @@ class FilterConfig:
 
 
 def matches(listing: Listing, config: FilterConfig = FilterConfig()) -> bool:
-    # A missing region cannot be considered a match because the requested
-    # search is explicitly limited to four regions.
     if listing.region not in TARGET_REGIONS:
         return False
     if listing.area_m2 is None or listing.area_m2 < config.min_area_m2:
@@ -29,8 +31,8 @@ def matches(listing: Listing, config: FilterConfig = FilterConfig()) -> bool:
     if listing.price_per_m2_czk is not None and listing.price_per_m2_czk > config.max_price_per_m2_czk:
         return False
 
-    text = " ".join(x for x in (listing.title, listing.description) if x).casefold()
-    return not any(phrase in text for phrase in EXCLUDED_PHRASES)
+    text = " ".join(x for x in (listing.title, listing.description) if x)
+    return not any(pattern.search(text) for pattern in EXCLUDED_PATTERNS)
 
 
 def filter_listings(listings: list[Listing], config: FilterConfig = FilterConfig()) -> list[Listing]:
