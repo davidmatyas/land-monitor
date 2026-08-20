@@ -5,7 +5,9 @@ from dataclasses import dataclass
 from .models import Listing
 
 TARGET_REGIONS = {"Liberecký kraj", "Středočeský kraj", "Plzeňský kraj", "Ústecký kraj"}
-EXCLUDED_KEYWORDS = ("orná půda", "orná půda", "les", "lesní pozemek", "lesní půda")
+# Use phrases rather than the bare word "les", which would also match
+# unrelated Czech words containing that character sequence.
+EXCLUDED_PHRASES = ("orná půda", "lesní pozemek", "lesní půda", "les")
 
 
 @dataclass(frozen=True, slots=True)
@@ -16,7 +18,9 @@ class FilterConfig:
 
 
 def matches(listing: Listing, config: FilterConfig = FilterConfig()) -> bool:
-    if listing.region and listing.region not in TARGET_REGIONS:
+    # A missing region cannot be considered a match because the requested
+    # search is explicitly limited to four regions.
+    if listing.region not in TARGET_REGIONS:
         return False
     if listing.area_m2 is None or listing.area_m2 < config.min_area_m2:
         return False
@@ -26,7 +30,7 @@ def matches(listing: Listing, config: FilterConfig = FilterConfig()) -> bool:
         return False
 
     text = " ".join(x for x in (listing.title, listing.description) if x).casefold()
-    return not any(keyword in text for keyword in EXCLUDED_KEYWORDS)
+    return not any(phrase in text for phrase in EXCLUDED_PHRASES)
 
 
 def filter_listings(listings: list[Listing], config: FilterConfig = FilterConfig()) -> list[Listing]:
